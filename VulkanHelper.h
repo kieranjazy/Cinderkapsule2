@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <optional>
+#include <fstream>
 #include "vulkan/vulkan.hpp"
 
 namespace CinderVk {
@@ -20,7 +21,7 @@ namespace CinderVk {
 			}
 		};
 
-		SwapchainSupportDetails querySwapchainSupport(vk::PhysicalDevice& device, vk::SurfaceKHR &surfaceKHR) {
+		static SwapchainSupportDetails querySwapchainSupport(vk::PhysicalDevice& device, vk::SurfaceKHR &surfaceKHR) {
 			SwapchainSupportDetails details;
 			device.getFeatures();
 			details.capabilities = device.getSurfaceCapabilitiesKHR(surfaceKHR);
@@ -44,7 +45,7 @@ namespace CinderVk {
 			return details;
 		}
 
-		QueueFamilyIndices findQueueFamilies(vk::PhysicalDevice &device, vk::SurfaceKHR& surfaceKHR) {
+		static QueueFamilyIndices findQueueFamilies(vk::PhysicalDevice &device, vk::SurfaceKHR& surfaceKHR) {
 			QueueFamilyIndices indices;
 
 			auto queueFamilies = device.getQueueFamilyProperties();
@@ -69,7 +70,7 @@ namespace CinderVk {
 			return indices;
 		}
 
-		vk::ImageView createImageView(vk::Image& image, vk::Format& format, vk::ImageAspectFlags aspectFlags, vk::Device& device) {
+		static vk::ImageView createImageView(vk::Image& image, vk::Format& format, vk::ImageAspectFlags aspectFlags, vk::Device& device) {
 			vk::ImageViewCreateInfo viewCreateInfo{};
 			viewCreateInfo.image = image;
 			viewCreateInfo.viewType = vk::ImageViewType::e2D;
@@ -88,7 +89,7 @@ namespace CinderVk {
 			return imageView;
 		}
 
-		vk::Format findSupportedFormat(const std::vector<vk::Format>& candidates, vk::ImageTiling tiling, vk::FormatFeatureFlags features, vk::PhysicalDevice& physicalDevice) {
+		static vk::Format findSupportedFormat(const std::vector<vk::Format>& candidates, vk::ImageTiling tiling, vk::FormatFeatureFlags features, vk::PhysicalDevice& physicalDevice) {
 			for (vk::Format format : candidates) {
 				vk::FormatProperties props;
 				physicalDevice.getFormatProperties(format, &props);
@@ -104,7 +105,7 @@ namespace CinderVk {
 			throw std::runtime_error("Failed to find a supported format for the physical device.");
 		}
 
-		vk::Format findDepthFormat(vk::PhysicalDevice& physicalDevice) {
+		static vk::Format findDepthFormat(vk::PhysicalDevice& physicalDevice) {
 			return findSupportedFormat(
 				{ vk::Format::eD32Sfloat, vk::Format::eD32SfloatS8Uint, vk::Format::eD24UnormS8Uint },
 				vk::ImageTiling::eOptimal,
@@ -113,6 +114,21 @@ namespace CinderVk {
 			);
 		}
 
+		static std::vector<char> readFile(const std::string& filename) {
+			std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
+			if (!file.is_open()) {
+				throw std::runtime_error("failed to open file!");
+			}
+			size_t fileSize = (size_t)file.tellg();
+			std::vector<char> buffer(fileSize);
+
+			file.seekg(0);
+			file.read(buffer.data(), fileSize);
+
+			file.close();
+
+			return buffer;
+		}
 	}
 }

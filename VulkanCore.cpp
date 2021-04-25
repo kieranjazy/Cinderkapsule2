@@ -3,6 +3,8 @@
 #include "VulkanHelper.h"
 #include "VulkanSwapchain.h"
 #include "VulkanRenderpass.h"
+#include "VulkanDescriptorSetLayout.h"
+#include "VulkanGraphicsPipeline.h"
 #include "vulkan/vulkan.hpp"
 
 #define VMA_IMPLEMENTATION
@@ -33,6 +35,8 @@ namespace CinderVk {
 		std::unique_ptr<vk::DispatchLoaderDynamic> dldiPtr = nullptr;
 		std::unique_ptr<VulkanSwapchain> swapchainPtr = nullptr;
 		std::unique_ptr<VulkanRenderpass> renderpassPtr = nullptr;
+		std::unique_ptr<VulkanDescriptorSetLayout> descriptorSetLayoutPtr = nullptr;
+		std::unique_ptr<VulkanGraphicsPipeline> graphicsPipelinePtr = nullptr;
 		VkDebugUtilsMessengerEXT debugMessenger;
 
 #ifdef NDEBUG
@@ -81,9 +85,22 @@ namespace CinderVk {
 
 			swapchainPtr = std::make_unique<VulkanSwapchain>(parent);
 			renderpassPtr = std::make_unique<VulkanRenderpass>(parent);
-			//createSwapchain();
-			//createImageViews();
-			//createRenderPass();
+			descriptorSetLayoutPtr = std::make_unique<VulkanDescriptorSetLayout>(parent);
+			graphicsPipelinePtr = std::make_unique<VulkanGraphicsPipeline>(parent);
+
+			//createFramebuffers();
+			//createCommandPool();
+			//createTextureSampler();
+
+			//loadModels();
+			
+			//createUniformBuffers();
+			//createLightingBuffer();
+			//createDescriptorPool();
+			//createDescriptorSets();
+			//createCommandBuffers();
+			//createSyncObjects();
+
 		}
 
 		const void createInstance() {
@@ -341,6 +358,26 @@ namespace CinderVk {
 
 	vk::Format VulkanCore::getSwapchainImageFormat() const {
 		return pImpl->swapchainPtr->getSwapchainImageFormat();
+	}
+
+	uint32_t VulkanCore::getSwapchainExtentWidth() const {
+		return pImpl->swapchainPtr->getSwapchainExtentWidth();
+	}
+
+	uint32_t VulkanCore::getSwapchainExtentHeight() const {
+		return pImpl->swapchainPtr->getSwapchainExtentHeight();
+	}
+
+	vk::Extent2D VulkanCore::getSwapchainExtent() const {
+		return pImpl->swapchainPtr->getSwapchainExtent();
+	}
+
+	vk::DescriptorSetLayout VulkanCore::getDescriptorSetLayout() const {
+		return pImpl->descriptorSetLayoutPtr->getDescriptorSetLayout();
+	}
+
+	vk::RenderPass VulkanCore::getRenderPass() const {
+		return pImpl->renderpassPtr->getRenderPass();
 	}
 
 	void VulkanCore::initVulkan() {

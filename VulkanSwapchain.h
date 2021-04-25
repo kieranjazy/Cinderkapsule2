@@ -15,6 +15,18 @@ namespace CinderVk {
 			return swapchainImageFormat;
 		}
 
+		uint32_t getSwapchainExtentWidth() {
+			return swapchainExtent.width;
+		}
+
+		uint32_t getSwapchainExtentHeight() {
+			return swapchainExtent.height;
+		}
+
+		vk::Extent2D getSwapchainExtent() {
+			return swapchainExtent;
+		}
+
 
 		~VulkanSwapchain() {
 			cleanup();

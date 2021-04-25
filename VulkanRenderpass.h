@@ -1,14 +1,17 @@
 #pragma once
-#include "VulkanCore.h"
+#include "VulkanWrapper.h"
 #include "VulkanHelper.h"
-#include "vulkan/vulkan.hpp"
 #include <array>
 
 namespace CinderVk {
-	class VulkanRenderpass {
+	class VulkanRenderpass : VulkanWrapper {
 	public:
-		VulkanRenderpass(VulkanCore* coreRef) : corePtr(coreRef) {
+		VulkanRenderpass(VulkanCore* coreRef) : VulkanWrapper(coreRef) {
 			init();
+		}
+
+		vk::RenderPass getRenderPass() {
+			return renderPass;
 		}
 
 		~VulkanRenderpass() {
@@ -16,12 +19,11 @@ namespace CinderVk {
 		}
 
 	private:
-		VulkanCore* corePtr;
 		vk::RenderPass renderPass;
 
 		void init() { //This class is gonna need a way to access VulkanSwapchain from the VulkanCore ptr.
 			vk::AttachmentDescription colourAttachment;
-			colourAttachment.format = corePtr->getSwapchainImageFormat();
+			colourAttachment.format = getCorePtr()->getSwapchainImageFormat();
 			colourAttachment.samples = vk::SampleCountFlagBits::e1;
 			colourAttachment.loadOp = vk::AttachmentLoadOp::eClear;
 			colourAttachment.storeOp = vk::AttachmentStoreOp::eStore;
@@ -31,7 +33,7 @@ namespace CinderVk {
 			colourAttachment.finalLayout = vk::ImageLayout::ePresentSrcKHR;
 
 			vk::AttachmentDescription depthAttachment{};
-			depthAttachment.format = Helper::findDepthFormat(*corePtr->getPhysicalDevicePtr());
+			depthAttachment.format = Helper::findDepthFormat(*getCorePtr()->getPhysicalDevicePtr());
 			depthAttachment.samples = vk::SampleCountFlagBits::e1;
 			depthAttachment.loadOp = vk::AttachmentLoadOp::eClear;
 			depthAttachment.storeOp = vk::AttachmentStoreOp::eDontCare;
@@ -72,12 +74,12 @@ namespace CinderVk {
 			renderPassInfo.dependencyCount = 1;
 			renderPassInfo.pDependencies = &dependency;
 
-			if (corePtr->getLogicalDevicePtr()->createRenderPass(&renderPassInfo, nullptr, &renderPass) != vk::Result::eSuccess) 
+			if (getCorePtr()->getLogicalDevicePtr()->createRenderPass(&renderPassInfo, nullptr, &renderPass) != vk::Result::eSuccess) 
 				throw std::runtime_error("Failed to create the render pass.");
 		}
 
 		void cleanup() {
-			corePtr->getLogicalDevicePtr()->destroyRenderPass(renderPass, nullptr);
+			getCorePtr()->getLogicalDevicePtr()->destroyRenderPass(renderPass, nullptr);
 		}
 
 	};

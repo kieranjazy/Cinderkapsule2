@@ -1,8 +1,8 @@
 //#include "vld.h"
-#include "Main.h"
 #include "VulkanCore.h"
 #include "Input.h"
 #include <SDL2/SDL_timer.h>
+#include <iostream>
 
 using namespace Cinder;
 
@@ -46,6 +46,8 @@ int main(int argc, char* argv[]) {
 			accumulatedTime -= timestep;
 		}
 	}
+
+	std::cout << std::endl;
 
 	return 1;
 }

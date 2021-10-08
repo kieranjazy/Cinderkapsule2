@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <string>
 
 
 namespace vk {
@@ -16,11 +17,13 @@ struct SDL_Window;
 
 
 namespace CinderVk {
+	class GLTFModelData;
+
 	class VulkanCore {
 	public:
 		
 		const void tick();
-		const void framebufferResizedSwitch(); //Needed for InputCore to interface with VulkanCore
+		const void framebufferResizedSwitch(); //Needed for InputCore to interface with VulkanCore in future
 
 		vk::PhysicalDevice* getPhysicalDevicePtr() const;
 		vk::Device* getLogicalDevicePtr() const;
@@ -33,12 +36,14 @@ namespace CinderVk {
 		vk::DescriptorSetLayout getDescriptorSetLayout() const;
 		vk::RenderPass getRenderPass() const;
 
+
 		void initVulkan();
 
 		VulkanCore();
 		~VulkanCore();
 
 	private:
+
 		struct impl;
 		std::unique_ptr<impl> pImpl;
 	};

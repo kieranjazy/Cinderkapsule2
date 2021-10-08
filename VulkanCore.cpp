@@ -5,6 +5,7 @@
 #include "VulkanRenderpass.h"
 #include "VulkanDescriptorSetLayout.h"
 #include "VulkanGraphicsPipeline.h"
+#include "VulkanTexture.h"
 #include "vulkan/vulkan.hpp"
 
 #define VMA_IMPLEMENTATION
@@ -29,8 +30,9 @@ namespace CinderVk {
 		vk::PhysicalDevice physicalDevice;
 		vk::Device device;
 		vk::Queue graphicsQueue, presentQueue;
+		vk::CommandPool commandPool;
+		vk::Sampler textureSampler;
 		VmaAllocator allocator;
-		
 
 		std::unique_ptr<vk::DispatchLoaderDynamic> dldiPtr = nullptr;
 		std::unique_ptr<VulkanSwapchain> swapchainPtr = nullptr;
@@ -88,9 +90,11 @@ namespace CinderVk {
 			descriptorSetLayoutPtr = std::make_unique<VulkanDescriptorSetLayout>(parent);
 			graphicsPipelinePtr = std::make_unique<VulkanGraphicsPipeline>(parent);
 
-			//createFramebuffers();
-			//createCommandPool();
-			//createTextureSampler();
+			swapchainPtr->createDepthResources();
+			swapchainPtr->createFramebuffers();
+
+			createCommandPool();
+			createTextureSampler();
 
 			//loadModels();
 			
@@ -170,6 +174,41 @@ namespace CinderVk {
 			);
 
 			debugMessenger = instance->createDebugUtilsMessengerEXT(debugCreateInfo, nullptr, *dldiPtr);
+		}
+
+		const void createCommandPool() {
+			Helper::QueueFamilyIndices queueFamilyIndices = Helper::findQueueFamilies(physicalDevice, surfaceKHR);
+
+			vk::CommandPoolCreateInfo poolInfo{};
+			poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
+			poolInfo.flags = vk::CommandPoolCreateFlags();
+
+			if (device.createCommandPool(&poolInfo, nullptr, &commandPool) != vk::Result::eSuccess) {
+				throw std::runtime_error("Failed to create command pool.");
+			}
+		}
+
+		const void createTextureSampler() {
+			vk::SamplerCreateInfo samplerInfo{};
+			samplerInfo.magFilter = vk::Filter::eLinear;
+			samplerInfo.minFilter = vk::Filter::eLinear;
+			samplerInfo.addressModeU = vk::SamplerAddressMode::eRepeat;
+			samplerInfo.addressModeV = vk::SamplerAddressMode::eRepeat;
+			samplerInfo.addressModeW = vk::SamplerAddressMode::eRepeat;
+			samplerInfo.anisotropyEnable = VK_TRUE;
+			samplerInfo.maxAnisotropy = 16.0f;
+			samplerInfo.borderColor = vk::BorderColor::eIntOpaqueBlack;
+			samplerInfo.unnormalizedCoordinates = VK_FALSE;
+			samplerInfo.compareEnable = VK_FALSE;
+			samplerInfo.compareOp = vk::CompareOp::eAlways;
+			samplerInfo.mipmapMode = vk::SamplerMipmapMode::eLinear;
+			samplerInfo.mipLodBias = 0.0f;
+			samplerInfo.minLod = 0.0f;
+			samplerInfo.maxLod = 0.0f;
+
+			if (device.createSampler(&samplerInfo, nullptr, &textureSampler) != vk::Result::eSuccess) {
+				throw std::runtime_error("Failed to create texture sampler.");
+			}
 		}
 
 		void createSurface() {
@@ -353,7 +392,7 @@ namespace CinderVk {
 	}
 
 	SDL_Window** VulkanCore::getWindowPtrPtr() const {
-		return &(pImpl->window); //technically pImpl doesn't exist yet because we are calling this function inside the pImpl constructor function
+		return &(pImpl->window); 
 	}
 
 	vk::Format VulkanCore::getSwapchainImageFormat() const {
@@ -379,6 +418,7 @@ namespace CinderVk {
 	vk::RenderPass VulkanCore::getRenderPass() const {
 		return pImpl->renderpassPtr->getRenderPass();
 	}
+
 
 	void VulkanCore::initVulkan() {
 		pImpl->initVulkan();

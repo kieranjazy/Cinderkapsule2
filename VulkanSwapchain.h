@@ -11,6 +11,14 @@ namespace CinderVk {
 			init();
 		}
 
+		void createDepthResources() {
+			createDepthResources();
+		}
+
+		void createFramebuffers() {
+			createFramebuffers();
+		}
+
 		vk::Format getSwapchainImageFormat() {
 			return swapchainImageFormat;
 		}
@@ -38,6 +46,12 @@ namespace CinderVk {
 		vk::Extent2D swapchainExtent;
 		std::vector<vk::Image> swapchainImages;
 		std::vector<vk::ImageView> swapchainImageViews;
+		std::vector<vk::Framebuffer> swapchainFramebuffers;
+
+		vk::Image depthImage;
+		vk::DeviceMemory depthImageMemory;
+		vk::ImageView depthImageView;
+
 		VulkanCore* corePtr;
 		SDL_Window** window;
 
@@ -137,10 +151,52 @@ namespace CinderVk {
 				swapchainImageViews[i] = Helper::createImageView(swapchainImages[i], swapchainImageFormat, vk::ImageAspectFlagBits::eColor, *corePtr->getLogicalDevicePtr());
 		}
 
-		void cleanup() {
-			corePtr->getLogicalDevicePtr()->destroySwapchainKHR(swapchain, nullptr);
+		const void createDepthResources() {
+			vk::Format depthFormat = Helper::findDepthFormat(*corePtr->getPhysicalDevicePtr());
+
+			createImage(getSwapchainExtentWidth(), getSwapchainExtentHeight(),
+				depthFormat, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::MemoryPropertyFlagBits::eDeviceLocal,
+				depthImage, depthImageMemory, *corePtr->getLogicalDevicePtr(), *corePtr->getPhysicalDevicePtr()
+			);
+
+			depthImageView = Helper::createImageView(depthImage, depthFormat, vk::ImageAspectFlagBits::eDepth, *corePtr->getLogicalDevicePtr());
 		}
 
+		void createFramebuffers() {
+			swapchainFramebuffers.resize(swapchainImageViews.size());
+
+			for (size_t i = 0; i != swapchainImageViews.size(); i++) {
+				std::array<vk::ImageView, 2> attachments = {
+					swapchainImageViews[i],
+					depthImageView
+				};
+
+				vk::FramebufferCreateInfo framebufferInfo{};
+				framebufferInfo.renderPass = corePtr->getRenderPass();
+				framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+				framebufferInfo.pAttachments = attachments.data();
+				framebufferInfo.width = swapchainExtent.width;
+				framebufferInfo.height = swapchainExtent.height;
+				framebufferInfo.layers = 1;
+
+				if ((*corePtr->getLogicalDevicePtr()).createFramebuffer(&framebufferInfo, nullptr, &swapchainFramebuffers[i]) != vk::Result::eSuccess) {
+					throw std::runtime_error("Failed to create the framebuffer.");
+				}
+			}
+		}
+
+		void cleanup() {
+			corePtr->getLogicalDevicePtr()->destroyImageView(depthImageView, nullptr);
+			corePtr->getLogicalDevicePtr()->destroyImage(depthImage, nullptr);
+			corePtr->getLogicalDevicePtr()->freeMemory(depthImageMemory, nullptr);
+
+			for (size_t i = 0; i != swapchainFramebuffers.size(); i++) {
+				corePtr->getLogicalDevicePtr()->destroyFramebuffer(swapchainFramebuffers[i], nullptr);
+			}
+
+
+			corePtr->getLogicalDevicePtr()->destroySwapchainKHR(swapchain, nullptr);
+		}
 	};
 }
 

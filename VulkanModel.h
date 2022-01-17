@@ -1,18 +1,19 @@
 #pragma once
-#include "vulkan/vulkan.hpp"
 #include "glm/glm.hpp"
+#include "fast_obj.h"
 #include "Vertex.h"
 #include <memory>
 
 namespace CinderVk {
-	struct TextureStruct {
+
+	struct TextureStruct { //Basic texture structure for e.g PBR maps, other info maps
 		vk::DeviceMemory textureImageMemory;
 		vk::Image texture;
 		vk::ImageView textureImageView;
 		vk::Sampler textureSampler;
 	};
 
-	struct VulkanModelData {
+	struct VulkanModelData { //A structure made to contain singular model data in memory
 		VulkanModelData(const std::string& modelLocation, vk::Device& logicalDevice, vk::Queue& graphicsQueue, vk::CommandPool& commandPool, vk::PhysicalDevice& physicalDevice) :
 			modelFileLocation(modelLocation), logicalDevicePtr(&logicalDevice), graphicsQueuePtr(&graphicsQueue), commandPoolPtr(&commandPool), physicalDevicePtr(&physicalDevice)
 		{};
@@ -48,7 +49,6 @@ namespace CinderVk {
 
 		uint32_t modelIndicesSize, modelVerticesSize; //set these in setupBuffers
 
-		//std::vector<Vertex> vertices;
 
 		uint32_t getModelIndicesSize();
 		uint32_t getModelVerticesSize();
@@ -95,8 +95,6 @@ namespace CinderVk {
 	private:
 		glm::mat4 localTransform;
 		glm::mat4 worldTransform;
-
-		vk::DescriptorSet descriptorSet;
 
 		std::shared_ptr<VulkanModelData> dataPtr;
 

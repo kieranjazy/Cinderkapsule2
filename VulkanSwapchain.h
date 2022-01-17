@@ -1,6 +1,7 @@
 #pragma once
 #include "VulkanHelper.h"
 #include "VulkanCore.h"
+#include "VulkanTexture.h"
 #include "SDL2/SDL_vulkan.h"
 #include <iostream>
 
@@ -11,11 +12,11 @@ namespace CinderVk {
 			init();
 		}
 
-		void createDepthResources() {
+		void createDepthResourcesPublic() {
 			createDepthResources();
 		}
 
-		void createFramebuffers() {
+		void createFramebuffersPublic() {
 			createFramebuffers();
 		}
 
@@ -57,7 +58,7 @@ namespace CinderVk {
 
 		void init() {
 			window = corePtr->getWindowPtrPtr();
-			Helper::SwapchainSupportDetails swapchainSupport = Helper::querySwapchainSupport(*corePtr->getPhysicalDevicePtr(), *corePtr->getSurfacePtr()); //Both pointers turn out as garbled nonsense
+			Helper::SwapchainSupportDetails swapchainSupport = Helper::querySwapchainSupport(*corePtr->getPhysicalDevicePtr(), *corePtr->getSurfacePtr());
 
 			vk::SurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapchainSupport.formats);
 			vk::PresentModeKHR presentMode = chooseSwapPresentMode(swapchainSupport.presentModes);

@@ -39,8 +39,6 @@ namespace CinderVk {
 
 		createVertexBuffer(verts);
 		createIndexBuffer(indices);
-
-
 	}
 
 	void VulkanModelData::createVertexBuffer(std::vector<Vertex>& verts) {

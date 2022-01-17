@@ -21,6 +21,14 @@
 
 namespace CinderVk {
 	struct VulkanCore::impl { //All VulkanCore inner workings go in here
+
+		class VulkanModelManager {
+
+
+
+
+		};
+
 	public:
 		VulkanCore* parent;
 
@@ -39,7 +47,10 @@ namespace CinderVk {
 		std::unique_ptr<VulkanRenderpass> renderpassPtr = nullptr;
 		std::unique_ptr<VulkanDescriptorSetLayout> descriptorSetLayoutPtr = nullptr;
 		std::unique_ptr<VulkanGraphicsPipeline> graphicsPipelinePtr = nullptr;
+		std::unique_ptr<VulkanModelManager> modelManagerPtr = nullptr;
 		VkDebugUtilsMessengerEXT debugMessenger;
+
+		
 
 #ifdef NDEBUG
 		const bool enableValidationLayers = false;
@@ -90,15 +101,19 @@ namespace CinderVk {
 			descriptorSetLayoutPtr = std::make_unique<VulkanDescriptorSetLayout>(parent);
 			graphicsPipelinePtr = std::make_unique<VulkanGraphicsPipeline>(parent);
 
-			swapchainPtr->createDepthResources();
-			swapchainPtr->createFramebuffers();
+			swapchainPtr->createDepthResourcesPublic();
+			swapchainPtr->createFramebuffersPublic();
 
 			createCommandPool();
 			createTextureSampler();
 
 			//loadModels();
-			
-			//createUniformBuffers();
+			//Load in a scene here
+
+
+			//Call these on scene change
+			//createUniformBuffers(); //each VulkanModel should manage their own
+			//Create uniform buffers should be done with push constants in every VulkanModel
 			//createLightingBuffer();
 			//createDescriptorPool();
 			//createDescriptorSets();
@@ -271,6 +286,14 @@ namespace CinderVk {
 
 			if (vmaCreateAllocator(&allocatorInfo, &allocator) != VK_SUCCESS)
 				throw std::runtime_error("VMA allocator could not be created.");
+		}
+
+		const void loadModels() {
+
+
+
+
+
 		}
 
 		const void drawFrame() {

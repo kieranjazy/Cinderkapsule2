@@ -17,8 +17,6 @@ struct SDL_Window;
 
 
 namespace CinderVk {
-	class GLTFModelData;
-
 	class VulkanCore {
 	public:
 		
@@ -43,13 +41,9 @@ namespace CinderVk {
 		~VulkanCore();
 
 	private:
-
 		struct impl;
 		std::unique_ptr<impl> pImpl;
 	};
 }
 
 using namespace CinderVk;
-
-// getVkPtr<VkSurfaceKHR>();
-// getVkPtr<vk::PhysicalDevice>();

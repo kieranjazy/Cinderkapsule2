@@ -7,30 +7,6 @@
 #include "VulkanBuffer.h"
 
 namespace CinderVk {
-	vk::Image createTextureImage(const std::string& texturePath, vk::Device& logicalDevice, vk::PhysicalDevice& physicalDevice, vk::DeviceMemory& textureImageMemory, vk::CommandPool& commandPool, vk::Queue& graphicsQueue) {
-		int texWidth, texHeight, texChannels;
-		vk::Image textureImage;
-		stbi_uc* pixels = stbi_load(texturePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-		vk::DeviceSize imageSize = texWidth * texHeight * 4;
-
-		if (!pixels)
-			throw std::runtime_error("Failed to load the texture image of: " + texturePath);
-
-		vk::Buffer stagingBuffer;
-		vk::DeviceMemory stagingBufferMemory;
-
-		createBuffer(imageSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, stagingBuffer, stagingBufferMemory, logicalDevice, physicalDevice);
-		void* data;
-		vkMapMemory(logicalDevice, stagingBufferMemory, 0, imageSize, 0, &data);
-		memcpy(data, pixels, static_cast<size_t>(imageSize));
-		vkUnmapMemory(logicalDevice, stagingBufferMemory);
-		
-		stbi_image_free(pixels);
-
-		//createImage(texWidth, texHeight, vk::Format)
-
-	}
-
 	void createImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& imageMemory, vk::Device& device, vk::PhysicalDevice& physicalDevice) {
 		vk::ImageCreateInfo imageInfo{};
 		imageInfo.imageType = vk::ImageType::e2D;
@@ -107,11 +83,75 @@ namespace CinderVk {
 		endSingleTimeCommands(commandBuffer, graphicsQueue, device, commandPool);
 	}
 
+	void copyBufferToImage(vk::Buffer& buffer, vk::Image image, uint32_t width, uint32_t height, vk::CommandPool& commandPool, vk::Device& logicalDevice, vk::Queue& graphicsQueue) {
+		vk::CommandBuffer commandBuffer = beginSingleTimeCommands(commandPool, logicalDevice);
 
+		vk::BufferImageCopy region{};
+		region.bufferOffset = 0;
+		region.bufferRowLength = 0;
+		region.bufferImageHeight = 0;
 
+		region.imageSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
+		region.imageSubresource.mipLevel = 0;
+		region.imageSubresource.baseArrayLayer = 0;
+		region.imageSubresource.layerCount = 1;
 
+		region.imageOffset = vk::Offset3D({ 0, 0, 0 });
+		region.imageExtent = vk::Extent3D({
+			width, height, 1
+		});
 
+		commandBuffer.copyBufferToImage(
+			buffer,
+			image,
+			vk::ImageLayout::eTransferDstOptimal,
+			1,
+			&region
+		);
 
+		endSingleTimeCommands(commandBuffer, graphicsQueue, logicalDevice, commandPool);
+	}
 
+	vk::Image createTextureImage(const std::string& texturePath, vk::Device& logicalDevice, vk::PhysicalDevice& physicalDevice, vk::DeviceMemory& textureImageMemory, vk::CommandPool& commandPool, vk::Queue& graphicsQueue) {
+		int texWidth, texHeight, texChannels;
+		vk::Image textureImage;
+		stbi_uc* pixels = stbi_load(texturePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+		vk::DeviceSize imageSize = texWidth * texHeight * 4;
 
+		if (!pixels)
+			throw std::runtime_error("Failed to load the texture image of: " + texturePath);
+
+		vk::Buffer stagingBuffer;
+		vk::DeviceMemory stagingBufferMemory;
+
+		createBuffer(imageSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, stagingBuffer, stagingBufferMemory, logicalDevice, physicalDevice);
+		void* data;
+		vkMapMemory(logicalDevice, stagingBufferMemory, 0, imageSize, 0, &data);
+		memcpy(data, pixels, static_cast<size_t>(imageSize));
+		vkUnmapMemory(logicalDevice, stagingBufferMemory);
+
+		stbi_image_free(pixels);
+
+		createImage(texWidth, texHeight, vk::Format::eR8G8B8A8Srgb, vk::ImageTiling::eOptimal,
+			vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled,
+			vk::MemoryPropertyFlagBits::eDeviceLocal, textureImage, textureImageMemory, logicalDevice, physicalDevice
+		);
+
+		transitionImageLayout(textureImage, vk::Format::eR8G8B8A8Srgb, vk::ImageLayout::eUndefined,
+			vk::ImageLayout::eTransferDstOptimal,
+			commandPool, logicalDevice, graphicsQueue
+		);
+
+		copyBufferToImage(stagingBuffer, textureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), commandPool, logicalDevice, graphicsQueue);
+
+		transitionImageLayout(textureImage, vk::Format::eR8G8B8A8Srgb, vk::ImageLayout::eTransferDstOptimal,
+			vk::ImageLayout::eShaderReadOnlyOptimal,
+			commandPool, logicalDevice, graphicsQueue
+		);
+
+		logicalDevice.destroyBuffer(stagingBuffer, nullptr);
+		logicalDevice.freeMemory(stagingBufferMemory, nullptr);
+
+		return textureImage;
+	}
 }

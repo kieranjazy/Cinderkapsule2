@@ -2,8 +2,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
 #include <glm/glm.hpp>
-
-#include "vulkan/vulkan.hpp"
+#include <vulkan/vulkan.hpp>
 #include <array>
 
 namespace CinderVk {

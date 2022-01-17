@@ -1,0 +1,16 @@
+﻿  VulkanCore.cpp
+C:\vcpkg\vcpkg\installed\x64-windows\include\vulkan\vulkan.hpp(18690,3): warning C4099: 'vk::Extent2D': type name first seen using 'class' now seen using 'struct'
+C:\vcpkg\vcpkg\installed\x64-windows\include\vulkan\vulkan.hpp(18689): message : see declaration of 'vk::Extent2D'
+J:\CinderK2\Cinderkapsule2\Cinderkapsule2\VulkanHelper.h(30,31): warning C4834: discarding return value of function with 'nodiscard' attribute
+J:\CinderK2\Cinderkapsule2\Cinderkapsule2\VulkanHelper.h(34,32): warning C4834: discarding return value of function with 'nodiscard' attribute
+J:\CinderK2\Cinderkapsule2\Cinderkapsule2\VulkanHelper.h(38,36): warning C4834: discarding return value of function with 'nodiscard' attribute
+J:\CinderK2\Cinderkapsule2\Cinderkapsule2\VulkanHelper.h(42,37): warning C4834: discarding return value of function with 'nodiscard' attribute
+J:\CinderK2\Cinderkapsule2\Cinderkapsule2\VulkanHelper.h(59,32): warning C4834: discarding return value of function with 'nodiscard' attribute
+J:\CinderK2\Cinderkapsule2\Cinderkapsule2\VulkanSwapchain.h(103,57): warning C4834: discarding return value of function with 'nodiscard' attribute
+J:\CinderK2\Cinderkapsule2\Cinderkapsule2\VulkanSwapchain.h(105,57): warning C4834: discarding return value of function with 'nodiscard' attribute
+J:\CinderK2\Cinderkapsule2\Cinderkapsule2\VulkanDescriptorSetLayout.h(50,1): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+  GLM: GLM_GTX_hash extension included
+J:\CinderK2\Cinderkapsule2\Cinderkapsule2\VulkanGraphicsPipeline.h(131,1): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+  VulkanModel.cpp
+  Generating Code...
+  Cinderkapsule2.vcxproj -> J:\CinderK2\Cinderkapsule2\x64\Debug\Cinderkapsule2.exe
